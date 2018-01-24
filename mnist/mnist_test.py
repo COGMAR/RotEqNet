@@ -5,11 +5,12 @@ from torch import optim
 import numpy as np
 from torch.autograd import Variable
 import random
-from mnist import loadMnistRot, random_rotation
+from mnist import loadMnistRot, random_rotation, linear_interpolation_2D
 
 import sys
 sys.path.append('../') #Import
 from layers_2D import *
+from utils import getGrid
 
 
 #!/usr/bin/env python
@@ -71,12 +72,24 @@ if __name__ == '__main__':
         start_lr = 0.01
         batch_size = 128
         optimizer = optim.Adam(net.parameters(), lr=start_lr)  # , weight_decay=0.01)
+        use_test_time_augmentation = True
+        use_train_time_augmentation = True
 
     if False: #From paper using MATLAB implementation - reported error rate of 1.4%
         start_lr = 0.1
         batch_size = 600
         optimizer = optim.SGD(net.parameters(), lr=start_lr, weight_decay=0.01)
+        use_test_time_augmentation = True
+        use_train_time_augmentation = True
 
+
+    def rotate_im(im, theta):
+        grid = getGrid([28, 28])
+        grid = rotate_grid_2D(grid, theta)
+        grid += 13.5
+        data = linear_interpolation_2D(im, grid)
+        data = np.reshape(data, [28, 28])
+        return data.astype('float32')
 
 
     def test(model, dataset):
@@ -86,8 +99,39 @@ if __name__ == '__main__':
         true = []
         pred = []
         for batch_no in xrange(len(dataset) / batch_size):
-            data, labels = getBatch(dataset)
-            out = F.softmax(model(data))
+            data, labels = getBatch(dataset, 'test')
+
+
+            #Run same sample with different orientations through network and average output
+            if use_test_time_augmentation:
+                data = data.cpu()
+                original_data = data.clone().data.cpu().numpy()
+
+                out = None
+                rotations = [0,15,30,45, 60, 75, 90]
+
+                for rotation in rotations:
+
+                    for i in range(batch_size):
+                        im = original_data[i,:,:,:].squeeze()
+                        im = rotate_im(im, rotation)
+                        im = im.reshape([1, 1, 28, 28])
+                        im = torch.FloatTensor(im)
+                        data[i,:,:,:] = im
+
+                    if type(gpu_no) == int:
+                        data = data.cuda(gpu_no)
+
+                    if out is None:
+                        out = F.softmax(model(data))
+                    else:
+                        out += F.softmax(model(data))
+
+                out /= len(rotations)
+
+            #Only run once
+            else:
+                out = F.softmax(model(data))
 
             loss = criterion(out, labels)
             _, c = torch.max(out, 1)
@@ -98,18 +142,19 @@ if __name__ == '__main__':
         acc = np.average(pred == true)
         return acc
 
-    def getBatch(dataset):
+    def getBatch(dataset, mode):
         """ Collect a batch of samples from list """
 
         # Make batch
         data = []
         labels = []
         for sample_no in range(batch_size):
-            tmp = dataset.pop()  # Pick top element
+            tmp = dataset.pop()  # Get top element and remove from list
             img = tmp[0].astype('float32').squeeze()
 
             # Train-time random rotation
-            img = random_rotation(img)
+            if mode == 'train' and use_train_time_augmentation:
+                img = random_rotation(img)
 
             data.append(np.expand_dims(np.expand_dims(img, 0), 0))
             labels.append(tmp[1].squeeze())
@@ -147,16 +192,17 @@ if __name__ == '__main__':
     for epoch_no in range(90):
 
         #Random order for each epoch
-        train_set_for_epoch = train_set[:]
-        random.shuffle(train_set_for_epoch)
+        train_set_for_epoch = train_set[:] #Make a copy
+        random.shuffle(train_set_for_epoch) #Shuffle the copy
 
         #Training
         net.train()
         for batch_no in xrange(len(train_set)/batch_size):
+
             # Train
             optimizer.zero_grad()
 
-            data, labels = getBatch(train_set_for_epoch)
+            data, labels = getBatch(train_set_for_epoch, 'train')
             out = net( data )
             loss = criterion( out,labels )
             _, c = torch.max(out, 1)

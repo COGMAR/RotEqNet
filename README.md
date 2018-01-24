@@ -55,36 +55,26 @@ torch
 numpy
 scipy
 ```
-To download and setup the MNIST-rot dataset, cd into the MNIST-folder and run
-
+To download and setup the MNIST-rot dataset, cd into the MNIST-folder and run:
 ```
 python download_mnist.py
 python make_mnist_rot.py
 ```
-
-## MNIST-rot test
+To run the MNIST-test:
+```
+python mnist_test.py
+```
+## Results from the MNIST-rot test
 The MNIST-experiment from the paper we aim to reproduce is based on
 - training on 10 000 images from the MNIST-rot dataset + applying random rotation as augmentation
 - validating on 2000 images from the MNIST-rot dataset
-- testing on 10 0000 images from the MNIST-rot dataset (no test-time augmentation)
-
-
-- We are not currently **not** able to reproduce the original result (1.4% - table 3) with the given setup
-   - SGD optimizer
-   - Batch size = 600 
-   - Learning rate decaying from 0.1 to 0.0001
-   - Weight decay = 0.01
-   
-- The current best error rate with this implementation (2.4%) we get using 
-   - ADAM optimizer
-   - batch size = 128
-   - learning rate decaying from 0.01 to 0.00001
-
-The performance difference could be due to bugs in the code or a matter of hyper parameters tuning
+- testing on 10 0000 images from the MNIST-rot dataset + with test-time augmentation as described in the paper
+- We obtain an test accuracy of 1.9% while the original paper reports 1.1% 
 
 ### Contact
-Anders U. Waldeland 
-anders@nr.no 
-Norwegian Computing Center
+Anders U. Waldeland <br/>
+Norwegian Computing Center <br/>
+anders@nr.no <br/>
+
 
 
