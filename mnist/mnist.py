@@ -3,7 +3,6 @@ import scipy.misc
 import sys
 sys.path.append('../')
 from utils import getGrid, rotate_grid_2D
-from make_mnist_rot import linear_interpolation_2D
 
 def loadMnist(mode):
     print 'Loading MNIST', mode, 'images'
