@@ -32,13 +32,6 @@ class RotConv(nn.Module):
 
         self.mode = mode
 
-        self.weight1 = Parameter(torch.Tensor( out_channels, in_channels , *kernel_size))
-
-        #If input is vector field, we have two filters (one for each component)
-        if self.mode == 2:
-            self.weight2 = Parameter(torch.Tensor( out_channels, in_channels, *kernel_size))
-
-
         #Angles
         self.angles = np.linspace(0,360,n_angles, endpoint=False)
         self.angle_tensors = []
@@ -46,8 +39,16 @@ class RotConv(nn.Module):
         #Get interpolation variables
         self.interp_vars = []
         for angle in self.angles:
-            self.interp_vars.append(get_filter_rotation_transforms(self.kernel_size, angle))
+            out = get_filter_rotation_transforms(self.kernel_size, angle)
+            self.interp_vars.append(out[:-1])
+            self.mask = out[-1]
+
             self.angle_tensors.append( Variable(torch.FloatTensor( np.array([angle/ 180. * np.pi]) )) )
+
+        self.weight1 = Parameter(torch.Tensor( out_channels, in_channels , *kernel_size))
+        #If input is vector field, we have two filters (one for each component)
+        if self.mode == 2:
+            self.weight2 = Parameter(torch.Tensor( out_channels, in_channels, *kernel_size))
 
         self.reset_parameters()
 
@@ -60,10 +61,15 @@ class RotConv(nn.Module):
         if self.mode == 2:
             self.weight2.data.uniform_(-stdv, stdv)
 
+    def mask_filters(self):
+        self.weight1 = Parameter(self.weight1.clone().data * self.mask+.00000001)
+        if self.mode == 2:
+            self.weight2 = Parameter(self.weight2.clone().data * self.mask+.00000001)
+
     def _apply(self, func):
         # This is called whenever user calls model.cuda()
         # We intersect to replace tensors and variables with cuda-versions
-
+        self.mask = func(self.mask)
         self.interp_vars = [[[func(el2) for el2 in el1] for el1 in el0] for el0 in self.interp_vars]
         self.angle_tensors = [func(el) for el in self.angle_tensors]
 
@@ -71,6 +77,9 @@ class RotConv(nn.Module):
 
 
     def forward(self,input):
+        #Uncomment this to turn on filter-masking
+        #Todo: fix broken convergence when filter-masking is on
+        #self.mask_filters()
 
         if self.mode == 1:
             outputs = []
@@ -87,7 +96,7 @@ class RotConv(nn.Module):
             #Get the maximum direction (Orientation Pooling)
             strength, max_ind =  torch.max(torch.cat(outputs,-1),-1)
 
-            #Convert to polar format
+            #Convert from polar representation
             angle_map = max_ind.float() * (360. / 8. / 180. * np.pi)
             u = F.relu(strength) * torch.cos(angle_map)
             v = F.relu(strength) * torch.sin(angle_map)
@@ -131,7 +140,7 @@ class RotConv(nn.Module):
 
             u = torch.gather(u, -1, max_ind.unsqueeze(-1))[:,:,:,:,0]
             v = torch.gather(v, -1, max_ind.unsqueeze(-1))[:,:,:,:,0]
-        
+
         return u, v
 
 class VectorMaxPool(nn.Module):
@@ -186,7 +195,7 @@ class Vector2Magnitude(nn.Module):
         return p
 
 class VectorBatchNorm(nn.Module):
-    def __init__(self, num_features, eps=1e-5, momentum=0.5, affine=True):
+    def     __init__(self, num_features, eps=1e-5, momentum=0.5, affine=True):
 
         super(VectorBatchNorm, self).__init__()
         self.num_features = num_features

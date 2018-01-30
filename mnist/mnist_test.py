@@ -51,6 +51,7 @@ if __name__ == '__main__':
                 nn.ReLU(),
                 nn.Dropout2d(0.7),
                 nn.Conv2d(128, 10, 1),  # FC2
+
             )
 
         def forward(self, x):
@@ -60,7 +61,7 @@ if __name__ == '__main__':
             return x
 
 
-    gpu_no =  1 # Set to False for cpu-version
+    gpu_no =  0 # Set to False for cpu-version
 
     #Setup net, loss function, optimizer and hyper parameters
     net = Net()
@@ -92,18 +93,17 @@ if __name__ == '__main__':
         return data.astype('float32')
 
 
-    def test(model, dataset):
+    def test(model, dataset, mode):
         """ Return test-acuracy for a dataset"""
         model.eval()
 
         true = []
         pred = []
         for batch_no in xrange(len(dataset) / batch_size):
-            data, labels = getBatch(dataset, 'test')
-
+            data, labels = getBatch(dataset, mode)
 
             #Run same sample with different orientations through network and average output
-            if use_test_time_augmentation:
+            if use_test_time_augmentation and mode == 'test':
                 data = data.cpu()
                 original_data = data.clone().data.cpu().numpy()
 
@@ -207,6 +207,7 @@ if __name__ == '__main__':
             loss = criterion( out,labels )
             _, c = torch.max(out, 1)
             loss.backward()
+
             optimizer.step()
 
             #Print training-acc
@@ -215,7 +216,7 @@ if __name__ == '__main__':
 
 
         #Validation
-        acc = test(net, val_set[:])
+        acc = test(net, val_set[:], 'val')
         print 'Val',  'epoch:', epoch_no,  ' acc:', acc
 
         #Save model if better than previous
@@ -228,7 +229,7 @@ if __name__ == '__main__':
 
     # Finally test on test-set with the best model
     net.load_state_dict(torch.load('best_model.pt'))
-    print 'Test', 'acc:', test(net, test_set[:])
+    print 'Test', 'acc:', test(net, test_set[:], 'test')
 
 
     
