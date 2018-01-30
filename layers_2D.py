@@ -3,7 +3,7 @@ This code is an PyTorch implementation of the method proposed in:
 Rotation equivariant vector field networks (ICCV 2017)
 Diego Marcos, Michele Volpi, Nikos Komodakis,  Devis Tuia
 https://arxiv.org/abs/1612.09346
-https://github.com/dmarcosg/RotEqNet
+https://github.com/dmarcosg/RotEqNet 
 """
 
 import torch.nn as nn
