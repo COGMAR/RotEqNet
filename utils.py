@@ -100,7 +100,7 @@ def compute_interpolation_grids(grid, kernel_dims, mask):
 
     # Get samples that are out of bounds or outside mask
     inds_out_of_bounds = np.logical_or.reduce([ind < 0 for ind in itertools.chain(inds_0, inds_1)] + \
-                                              [ind > siz for ind, siz in zip(inds_0, kernel_dims)] + \
+                                              [ind >= siz for ind, siz in zip(inds_0, kernel_dims)] + \
                                               [ind >= siz for ind, siz in zip(inds_1, kernel_dims)] +
                                               (1-mask).astype('bool')
                                               )
