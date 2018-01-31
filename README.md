@@ -6,11 +6,14 @@ Diego Marcos, Michele Volpi, Nikos Komodakis, Devis Tuia
 https://arxiv.org/abs/1612.09346
 
 
-
 The original MATLAB implementation is available at:
 https://github.com/dmarcosg/RotEqNet
 
 The main goal is to provide an implementation of the new network layers proposed in the paper. In addition we try to reproduce the results the MNIST-rot dataset to verify the implementation.
+
+### Todo:
+Masking of the filters is not implemented yet.
+
 
 ### Example usage
 ```python
@@ -69,7 +72,7 @@ The MNIST-experiment from the paper we aim to reproduce is based on
 - training on 10 000 images from the MNIST-rot dataset + applying random rotation as augmentation
 - validating on 2000 images from the MNIST-rot dataset
 - testing on 10 0000 images from the MNIST-rot dataset + with test-time augmentation as described in the paper
-- We obtain an test accuracy of 1.9% while the original paper reports 1.1% 
+- We obtain an test accuracy of 1.4% while the original paper reports 1.1% 
 
 ### Contact
 Anders U. Waldeland <br/>
