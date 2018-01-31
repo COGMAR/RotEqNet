@@ -93,22 +93,11 @@ class RotConv(nn.Module):
                 out = F.conv2d(input, weight, None, self.stride, self.padding, self.dilation)
                 outputs.append(out.unsqueeze(-1))
 
-            #Get the maximum direction (Orientation Pooling)
-            strength, max_ind =  torch.max(torch.cat(outputs,-1),-1)
-
-            #Convert from polar representation
-            angle_map = max_ind.float() * (360. / 8. / 180. * np.pi)
-            u = F.relu(strength) * torch.cos(angle_map)
-            v = F.relu(strength) * torch.sin(angle_map)
-
         if self.mode == 2:
             u = input[0]
             v = input[1]
 
-            output_u = []
-            output_v = []
-            output_p = [] #magnitude of field
-
+            outputs = []
             # Loop through the different filter-transformations
             for ind, interp_vars in enumerate(self.interp_vars):
                 angle = self.angle_tensors[ind]
@@ -119,27 +108,23 @@ class RotConv(nn.Module):
                 # Do convolution for u
                 wru = torch.cos(angle) * wu - torch.sin(angle ) * wv
                 u_out = F.conv2d(u, wru, None, self.stride, self.padding, self.dilation)
-                output_u.append(u_out.unsqueeze(-1) )
 
                 # Do convolution for v
                 wrv = torch.sin(angle) * wu + torch.cos(angle) * wv
                 v_out = F.conv2d(v, wrv, None, self.stride, self.padding, self.dilation)
-                output_v.append(v_out.unsqueeze(-1) )
 
                 #Compute magnitude (p)
-                output_p.append( torch.sqrt( u_out**2 + v_out**2).unsqueeze(-1) )
+                outputs.append( torch.sqrt( u_out**2 + v_out**2).unsqueeze(-1) )
+                
 
+        # Get the maximum direction (Orientation Pooling)
+        strength, max_ind = torch.max(torch.cat(outputs, -1), -1)
 
+        # Convert from polar representation
+        angle_map = max_ind.float() * (360. / len(self.angles) / 180. * np.pi)
+        u = F.relu(strength) * torch.cos(angle_map)
+        v = F.relu(strength) * torch.sin(angle_map)
 
-            # Get the maximum direction (Orientation Pooling)
-            strength, max_ind = torch.max(torch.cat(output_p, -1), -1)
-
-            # Select the u,v for the maximum orientation
-            u = torch.cat(output_u, -1)
-            v = torch.cat(output_v, -1)
-
-            u = torch.gather(u, -1, max_ind.unsqueeze(-1))[:,:,:,:,0]
-            v = torch.gather(v, -1, max_ind.unsqueeze(-1))[:,:,:,:,0]
 
         return u, v
 
