@@ -69,7 +69,7 @@ if __name__ == '__main__':
     if type(gpu_no) == int:
         net.cuda(gpu_no)
 
-    if True: #Current best setup using this implementation - error rate of 2.4%
+    if True: #Current best setup using this implementation - error rate of 1.2%
         start_lr = 0.01
         batch_size = 128
         optimizer = optim.Adam(net.parameters(), lr=start_lr)  # , weight_decay=0.01)

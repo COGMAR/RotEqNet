@@ -62,9 +62,9 @@ class RotConv(nn.Module):
             self.weight2.data.uniform_(-stdv, stdv)
 
     def mask_filters(self):
-        self.weight1 = Parameter(self.weight1.clone().data * self.mask+.00000001)
+        self.weight1.data[self.mask.expand_as(self.weight1) == 0] = 1e-8
         if self.mode == 2:
-            self.weight2 = Parameter(self.weight2.clone().data * self.mask+.00000001)
+            self.weight2.data[self.mask.expand_as(self.weight1) == 0] = 1e-8
 
     def _apply(self, func):
         # This is called whenever user calls model.cuda()
