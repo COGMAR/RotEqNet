@@ -1,6 +1,6 @@
 # Rotational Equivariant Vector Field Networks (RotEqNet) for PyTorch
 
-This is an PyTorch implementation of the method proposed in:
+This is an PyTorch implementation (python 2.7) of the method proposed in:
 Rotation equivariant vector field networks, ICCV 2017,
 Diego Marcos, Michele Volpi, Nikos Komodakis, Devis Tuia
 https://arxiv.org/abs/1612.09346
@@ -74,7 +74,7 @@ The MNIST-experiment from the paper we aim to reproduce is based on
 - We obtain an test accuracy of 1.2% and the original paper reports 1.1% 
 
 ### Known issues:
-The "old" implementation of bilinear interpolation of filters (apply_transformation in utils.py) sometimes cause CUDA runtime error 59. This error disappears when using a torch.gather to collect the samples, but this does reduce the best test error rate to ~3%.  
+- The "old" implementation of bilinear interpolation of filters (apply_transformation in utils.py) sometimes cause CUDA runtime error 59. This error disappears when using a torch.gather to collect the samples, but this does reduce the best test error rate to ~3%.  
 
 
 ### Contact
