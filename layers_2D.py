@@ -5,7 +5,7 @@ Diego Marcos, Michele Volpi, Nikos Komodakis,  Devis Tuia
 https://arxiv.org/abs/1612.09346
 https://github.com/dmarcosg/RotEqNet 
 """
-
+from __future__ import division
 import torch.nn as nn
 from torch.nn import functional as F
 from torch.nn.parameter import Parameter
@@ -39,7 +39,7 @@ class RotConv(nn.Module):
         #Get interpolation variables
         self.interp_vars = []
         for angle in self.angles:
-            out = get_filter_rotation_transforms(self.kernel_size, angle)
+            out = get_filter_rotation_transforms(list(self.kernel_size), angle)
             self.interp_vars.append(out[:-1])
             self.mask = out[-1]
 
@@ -73,7 +73,7 @@ class RotConv(nn.Module):
         self.interp_vars = [[[func(el2) for el2 in el1] for el1 in el0] for el0 in self.interp_vars]
         self.angle_tensors = [func(el) for el in self.angle_tensors]
 
-        super(RotConv, self)._apply(func)
+        return super(RotConv, self)._apply(func)
 
 
     def forward(self,input):
@@ -114,13 +114,13 @@ class RotConv(nn.Module):
                 v_out = F.conv2d(v, wrv, None, self.stride, self.padding, self.dilation)
 
                 #Compute magnitude (p)
-                outputs.append( torch.sqrt( u_out**2 + v_out**2).unsqueeze(-1) )
+                outputs.append(  (u_out + v_out).unsqueeze(-1) )
                 
 
         # Get the maximum direction (Orientation Pooling)
         strength, max_ind = torch.max(torch.cat(outputs, -1), -1)
 
-        # Convert from polar representation
+        # Convert from polar representation q
         angle_map = max_ind.float() * (360. / len(self.angles) / 180. * np.pi)
         u = F.relu(strength) * torch.cos(angle_map)
         v = F.relu(strength) * torch.sin(angle_map)
