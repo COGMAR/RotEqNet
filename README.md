@@ -18,17 +18,18 @@ The main goal is to provide an implementation of the new network layers proposed
 ```python
 from layers_2D import RotConv, VectorMaxPool, VectorBatchNorm, Vector2Magnitude, VectorUpsampling
 from torch import nn
+from __future__ import division
 
 class MnistNet(nn.Module):
     def __init__(self):
         super(MnistNet, self).__init__()
 
         self.main = nn.Sequential(           
-            RotConv(1, 6, [9, 9], 1, 9 / 2, n_angles=17, mode=1), #First RotConv must have mode=1 
+            RotConv(1, 6, [9, 9], 1, 9 // 2, n_angles=17, mode=1), #First RotConv must have mode=1 
             VectorMaxPool(2),
             VectorBatchNorm(6),
             
-            RotConv(6, 16, [9, 9], 1, 9 / 2, n_angles=17, mode=2), #The next RotConv has mode=2 (since input is vector field)
+            RotConv(6, 16, [9, 9], 1, 9 // 2, n_angles=17, mode=2), #The next RotConv has mode=2 (since input is vector field)
             VectorMaxPool(2),
             VectorBatchNorm(16),
             
