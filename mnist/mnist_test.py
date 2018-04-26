@@ -1,3 +1,4 @@
+from __future__ import division, print_function
 import torch
 import  torch.nn as nn
 from torch.nn import functional as F
@@ -11,7 +12,6 @@ import sys
 sys.path.append('../') #Import
 from layers_2D import *
 from utils import getGrid
-
 
 #!/usr/bin/env python
 __author__ = "Anders U. Waldeland"
@@ -35,11 +35,11 @@ if __name__ == '__main__':
 
             self.main = nn.Sequential(
 
-                RotConv(1, 6, [9, 9], 1, 9 / 2, n_angles=17, mode=1),
+                RotConv(1, 6, [9, 9], 1, 9 // 2, n_angles=17, mode=1),
                 VectorMaxPool(2),
                 VectorBatchNorm(6),
 
-                RotConv(6, 16, [9, 9], 1, 9 / 2, n_angles=17, mode=2),
+                RotConv(6, 16, [9, 9], 1, 9 // 2, n_angles=17, mode=2),
                 VectorMaxPool(2),
                 VectorBatchNorm(16),
 
@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
         true = []
         pred = []
-        for batch_no in xrange(len(dataset) / batch_size):
+        for batch_no in xrange(len(dataset) // batch_size):
             data, labels = getBatch(dataset, mode)
 
             #Run same sample with different orientations through network and average output
@@ -131,7 +131,7 @@ if __name__ == '__main__':
 
             #Only run once
             else:
-                out = F.softmax(model(data))
+                out = F.softmax(model(data),dim=1)
 
             loss = criterion(out, labels)
             _, c = torch.max(out, 1)
@@ -197,7 +197,7 @@ if __name__ == '__main__':
 
         #Training
         net.train()
-        for batch_no in xrange(len(train_set)/batch_size):
+        for batch_no in xrange(len(train_set)//batch_size):
 
             # Train
             optimizer.zero_grad()
@@ -212,24 +212,24 @@ if __name__ == '__main__':
 
             #Print training-acc
             if batch_no%10 == 0:
-                print 'Train', 'epoch:', epoch_no, ' batch:', batch_no, ' loss:', loss.data.cpu().numpy()[0], ' acc:', np.average((c == labels).data.cpu().numpy())
+                print('Train', 'epoch:', epoch_no, ' batch:', batch_no, ' loss:', loss.data.cpu().numpy()[0], ' acc:', np.average((c == labels).data.cpu().numpy()))
 
 
         #Validation
         acc = test(net, val_set[:], 'val')
-        print 'Val',  'epoch:', epoch_no,  ' acc:', acc
+        print('Val',  'epoch:', epoch_no,  ' acc:', acc)
 
         #Save model if better than previous
         if acc > best_acc:
             torch.save(net.state_dict(), 'best_model.pt')
             best_acc = acc
-            print 'Model saved'
+            print('Model saved')
 
         adjust_learning_rate(optimizer, epoch_no)
 
     # Finally test on test-set with the best model
     net.load_state_dict(torch.load('best_model.pt'))
-    print 'Test', 'acc:', test(net, test_set[:], 'test')
+    print('Test', 'acc:', test(net, test_set[:], 'test'))
 
 
     
