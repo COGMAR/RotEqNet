@@ -243,11 +243,11 @@ class VectorBatchNorm(nn.Module):
         #This line should perharps read:
         #var = (p-mu)**2 #?
 
-        var = torch.sum(var, 0, keepdim=True)
-        var = torch.sum(var, 2, keepdim=True)
-        var = torch.sum(var, 3, keepdim=True)
+        var = torch.mean(var, 0, keepdim=True)
+        var = torch.mean(var, 2, keepdim=True)
+        var = torch.mean(var, 3, keepdim=True)
+        var = var - mu**2
         std = torch.sqrt(var)
-
 
         return std
 
