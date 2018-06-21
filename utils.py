@@ -1,7 +1,7 @@
+from __future__ import division
 from scipy.linalg import expm, norm
 import collections
 import itertools
-from __future__ import division
 import numpy as np
 from torch.autograd import Variable
 import torch
