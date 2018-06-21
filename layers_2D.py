@@ -239,8 +239,8 @@ class VectorBatchNorm(nn.Module):
         
         var = (p)**2 
         var = torch.mean(var, 0, keepdim=True) 
-        var = torch.mean(var, 1, keepdim=True) 
         var = torch.mean(var, 2, keepdim=True)
+        var = torch.mean(var, 3, keepdim=True)
         std = torch.sqrt(var)
 
         return std
