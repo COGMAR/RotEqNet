@@ -233,20 +233,14 @@ class VectorBatchNorm(nn.Module):
         #Vector to magnitude
         p = torch.sqrt(u ** 2 + v ** 2)
 
-        #Mean
-        mu = torch.mean(p,  0, keepdim=True)
-        mu = torch.mean(mu, 2, keepdim=True)
-        mu = torch.mean(mu, 3, keepdim=True)
-
-        #Variance
-        var = (p)**2
-        #This line should perharps read:
-        #var = (p-mu)**2 #?
-
-        var = torch.mean(var, 0, keepdim=True)
+        #We want to normalize the vector magnitudes,
+        #therefore we ommit the mean (var = (p-p.mean())**2) 
+        #since we do not want to move the center of the vectors.
+        
+        var = (p)**2 
+        var = torch.mean(var, 0, keepdim=True) 
+        var = torch.mean(var, 1, keepdim=True) 
         var = torch.mean(var, 2, keepdim=True)
-        var = torch.mean(var, 3, keepdim=True)
-        var = var - mu**2
         std = torch.sqrt(var)
 
         return std
