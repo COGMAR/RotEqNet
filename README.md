@@ -18,9 +18,10 @@ The goal of this code is to provide an implementation of the new network layers 
 
 ### Example usage
 ```python
+from __future__ import division
 from layers_2D import RotConv, VectorMaxPool, VectorBatchNorm, Vector2Magnitude, VectorUpsampling
 from torch import nn
-from __future__ import division
+
 
 class MnistNet(nn.Module):
     def __init__(self):
