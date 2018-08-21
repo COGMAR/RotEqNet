@@ -3,10 +3,12 @@
 This is a PyTorch implementation of the method proposed in:
 Rotation equivariant vector field networks, ICCV 2017,
 Diego Marcos, Michele Volpi, Nikos Komodakis, Devis Tuia.
+
 https://arxiv.org/abs/1612.09346
 
 
 The original MATLAB implementation can be found at:
+
 https://github.com/dmarcosg/RotEqNet
 
 The goal of this code is to provide an implementation of the new network layers proposed in the paper. In addition we try to reproduce the results the MNIST-rot dataset to verify the implementation.
@@ -72,6 +74,7 @@ The MNIST-experiment in the orignial paper was obtained by:
 - training on 10 000 images from the MNIST-rot dataset + applying random rotation as augmentation
 - validating on 2000 images from the MNIST-rot dataset
 - testing on 10 0000 images from the MNIST-rot dataset + with test-time augmentation as described in the paper
+
 Using this implementation, we obtain a test accuracy of 1.2%, while the original paper reports 1.1%.
 
 ### Known issues:
