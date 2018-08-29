@@ -3,7 +3,7 @@ This code is an PyTorch implementation of the method proposed in:
 Rotation equivariant vector field networks (ICCV 2017)
 Diego Marcos, Michele Volpi, Nikos Komodakis,  Devis Tuia
 https://arxiv.org/abs/1612.09346
-https://github.com/dmarcosg/RotEqNet 
+https://github.com/dmarcosg/RotEqNet (original code)
 """
 from __future__ import division
 import torch.nn as nn
@@ -178,6 +178,18 @@ class Vector2Magnitude(nn.Module):
 
         p = torch.sqrt(v ** 2 + u ** 2)
         return p
+
+class Vector2Angle(nn.Module):
+    def __init__(self):
+        super(Vector2Angle, self).__init__()
+
+    def forward(self, input):
+        u = input[0]
+        v = input[1]
+
+        angle = torch.atan2(u, v)
+
+        return angle
 
 class VectorBatchNorm(nn.Module):
     def     __init__(self, num_features, eps=1e-5, momentum=0.5, affine=True):
