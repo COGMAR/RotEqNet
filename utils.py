@@ -200,10 +200,10 @@ if __name__ == '__main__':
     #w[:,:,0,0] = -1
 
 
-    print w
+    print(w)
     for angle in [0,90,45,180,65,10]:
-        print angle,'degrees'
-        print apply_transform(w, get_filter_rotation_transforms(ks, angle)[:-1], ks,old_bilinear_interpolation=True) * Variable(get_filter_rotation_transforms(ks, angle)[-1])
-        print 'Difference', torch.sum(apply_transform(w, get_filter_rotation_transforms(ks, angle)[:-1], ks,old_bilinear_interpolation=False) * Variable( get_filter_rotation_transforms(ks, angle)[-1]) - apply_transform(w, get_filter_rotation_transforms(ks, angle)[:-1], ks,old_bilinear_interpolation=True) * Variable(get_filter_rotation_transforms(ks, angle)[-1]))
+        print(angle,'degrees')
+        print(apply_transform(w, get_filter_rotation_transforms(ks, angle)[:-1], ks,old_bilinear_interpolation=True) * Variable(get_filter_rotation_transforms(ks, angle)[-1]))
+        print('Difference', torch.sum(apply_transform(w, get_filter_rotation_transforms(ks, angle)[:-1], ks,old_bilinear_interpolation=False) * Variable( get_filter_rotation_transforms(ks, angle)[-1]) - apply_transform(w, get_filter_rotation_transforms(ks, angle)[:-1], ks,old_bilinear_interpolation=True) * Variable(get_filter_rotation_transforms(ks, angle)[-1])))
 
 
